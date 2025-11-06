@@ -1,3 +1,4 @@
+
 deploy-env:
 	scripts/deploy-env.sh > /dev/null
 	
@@ -9,3 +10,12 @@ deploy-python:
 
 deploy-node:
 	scripts/deploy-node.sh > /dev/null
+
+set_env_variables:
+	@echo "Setting AWS Credentials..."
+	export $(grep -v '^#' .env)
+
+# Python only
+export_serverless_requirements:
+	@echo "Exporting requirements..."
+	uv pip compile pyproject.toml -o app/python/requirements.txt
