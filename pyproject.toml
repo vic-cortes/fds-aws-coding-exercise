@@ -5,7 +5,12 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "boto3>=1.40.67",
     "pydantic>=2.12.4",
     "python-dotenv>=1.2.1",
+]
+
+[dependency-groups]
+dev = [
+    "boto3>=1.40.67",
+    "ipython>=9.7.0",
 ]

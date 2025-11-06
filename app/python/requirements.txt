@@ -2,28 +2,12 @@
 #    uv pip compile pyproject.toml -o app/python/requirements.txt
 annotated-types==0.7.0
     # via pydantic
-boto3==1.40.67
-    # via fds-aws-coding-exercise (pyproject.toml)
-botocore==1.40.67
-    # via
-    #   boto3
-    #   s3transfer
-jmespath==1.0.1
-    # via
-    #   boto3
-    #   botocore
 pydantic==2.12.4
     # via fds-aws-coding-exercise (pyproject.toml)
 pydantic-core==2.41.5
     # via pydantic
-python-dateutil==2.9.0.post0
-    # via botocore
 python-dotenv==1.2.1
     # via fds-aws-coding-exercise (pyproject.toml)
-s3transfer==0.14.0
-    # via boto3
-six==1.17.0
-    # via python-dateutil
 typing-extensions==4.15.0
     # via
     #   pydantic
@@ -31,5 +15,3 @@ typing-extensions==4.15.0
     #   typing-inspection
 typing-inspection==0.4.2
     # via pydantic
-urllib3==2.5.0
-    # via botocore
