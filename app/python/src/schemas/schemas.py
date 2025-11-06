@@ -1,5 +1,7 @@
-from dataclasses import dataclass
 from enum import StrEnum
+from typing import Annotated
+
+from pydantic import BaseModel
 
 
 class SubscriptionStatus(StrEnum):
@@ -7,8 +9,7 @@ class SubscriptionStatus(StrEnum):
     INACTIVE = "inactive"
 
 
-@dataclass
-class SubscriptionSchema:
+class SubscriptionSchema(BaseModel):
     pk: str
     sk: str
     type: str
@@ -20,8 +21,7 @@ class SubscriptionSchema:
     attributes: dict
 
 
-@dataclass
-class PlanSchema:
+class PlanSchema(BaseModel):
     pk: str
     sk: str
     type: str
@@ -30,4 +30,7 @@ class PlanSchema:
     currency: str
     billingCycle: str
     features: list
-    status: SubscriptionStatus
+    status: Annotated[
+        list[SubscriptionStatus],
+        SubscriptionStatus.ACTIVE | SubscriptionStatus.INACTIVE,
+    ]

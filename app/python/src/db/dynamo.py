@@ -1,6 +1,8 @@
 import boto3
 from config import IS_DEVELOPMENT, Config
 
+from ..schemas.schemas import SubscriptionSchema
+
 
 class DynamoFender:
     """
@@ -26,14 +28,34 @@ class DynamoFender:
                 f"Could't make connection to `{tablename}` table due `{error}`"
             )
 
+    def write(self, data: list) -> bool:
+        """
+        Writes data into table
+        """
+
+        if not data:
+            raise ValueError("Data cannot be empty or null")
+
+        if not isinstance(data, list):
+            raise ValueError(f"Data must be type `list`, given `{type(data)}`")
+
+        with self.table.batch_writer() as batch:
+            for values in data:
+                batch.put_item(Item=values)
+
+        return True
+
 
 class SubscriptionTable(DynamoFender):
     """
     DynamoDB handler for Subscription table.
     """
 
-    __tablename__ = "sub"
+    __tablename__ = "FenderSubscriptions"
 
     def __init__(self, tablename: str = None) -> None:
         _tablename = tablename or self.__tablename__
         super().__init__(_tablename)
+
+    def write(self, data: SubscriptionSchema) -> bool:
+        return super().write(data.model_dump())
