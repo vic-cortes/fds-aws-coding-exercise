@@ -1,8 +1,5 @@
-from http import HTTPStatus
+from src.utils.response import success_response
 
 
 def handler(event, context):
-    return {
-        "statusCode": HTTPStatus.OK,
-        "body": "Hello from Python Lambda!",
-    }
+    return success_response("Fender Python Lambda is up and running!")

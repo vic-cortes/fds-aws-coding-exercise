@@ -25,3 +25,15 @@ class DynamoFender:
             raise ValueError(
                 f"Could't make connection to `{tablename}` table due `{error}`"
             )
+
+
+class SubscriptionTable(DynamoFender):
+    """
+    DynamoDB handler for Subscription table.
+    """
+
+    __tablename__ = "sub"
+
+    def __init__(self, tablename: str = None) -> None:
+        _tablename = tablename or self.__tablename__
+        super().__init__(_tablename)
