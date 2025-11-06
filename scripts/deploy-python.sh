@@ -3,7 +3,7 @@
 mkdir .temp
 mkdir .temp/package
 
-pip install -r app/python/requirements.txt -t .temp/package
+uv pip install -r app/python/requirements.txt --target .temp/package
 cp -r app/python/src/. .temp/package
 
 cd .temp/package

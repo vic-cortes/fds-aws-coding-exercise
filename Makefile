@@ -19,3 +19,10 @@ set_env_variables:
 export_serverless_requirements:
 	@echo "Exporting requirements..."
 	uv pip compile pyproject.toml -o app/python/requirements.txt
+
+check_lambda_status:
+	@echo "Checking Lambda function status..."
+	aws lambda get-function-configuration \
+		--profile "fender" \
+		--function-name fender_digital_code_exercise \
+		--query '{State:State, LastUpdateStatus:LastUpdateStatus, LastUpdateStatusReason:LastUpdateStatusReason}'
