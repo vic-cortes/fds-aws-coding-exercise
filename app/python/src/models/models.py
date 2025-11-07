@@ -1,4 +1,4 @@
-from ..schemas.schemas import PlanSchema, SubscriptionSchema
+from ..schemas.schemas import PlanSchema, SubscriptionEventPayload, SubscriptionSchema
 
 
 class SubscriptionModel:
@@ -11,3 +11,7 @@ class PlanModel:
 
     def create(self, data: PlanSchema) -> None:
         pass
+
+
+class SubscriptionPlanModel:
+    payload: SubscriptionEventPayload
