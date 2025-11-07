@@ -1,5 +1,5 @@
 from enum import StrEnum
-from typing import Annotated
+from typing import Literal
 
 from pydantic import BaseModel
 
@@ -70,7 +70,7 @@ class SubscriptionSchema(BaseModel):
     planSku: str
     startDate: str
     expiresAt: str
-    cancelledAt: str
+    cancelledAt: str | None
     lastModified: str
     attributes: dict
 
@@ -84,4 +84,4 @@ class PlanSchema(BaseModel):
     currency: str
     billingCycle: str
     features: list
-    status: list
+    status: Literal[SubscriptionStatus.ACTIVE, SubscriptionStatus.INACTIVE]

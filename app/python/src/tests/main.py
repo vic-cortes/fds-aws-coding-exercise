@@ -1,6 +1,6 @@
 import pytest
 
-from ..schemas.schemas import SubscriptionEvent
+from ..schemas.schemas import EventSchema, SubscriptionEvent
 
 SAMPLE_DATA = {
     "eventId": "evt_123456789",
@@ -19,7 +19,7 @@ SAMPLE_DATA = {
     },
 }
 
-GET_EVENT_SUBSCRIPTION = {
+AWS_GET_EVENT_SUBSCRIPTION = {
     "resource": "/api/v1/subscriptions/{userId}",
     "path": "/api/v1/subscriptions/dummy_user",
     "httpMethod": "GET",
@@ -83,7 +83,7 @@ GET_EVENT_SUBSCRIPTION = {
     "body": None,
     "isBase64Encoded": False,
 }
-POST_EVENT_SUBSCRIPTION = {
+AWS_POST_EVENT_SUBSCRIPTION = {
     "resource": "/api/v1/subscriptions/{userId}",
     "path": "/api/v1/subscriptions/dummy_user",
     "httpMethod": "POST",
@@ -147,6 +147,16 @@ POST_EVENT_SUBSCRIPTION = {
     "body": {"sample_key": "sample_value"},
     "isBase64Encoded": False,
 }
+
+
+def test_event_schema_get_method():
+    event = EventSchema(**AWS_GET_EVENT_SUBSCRIPTION)
+    assert event.is_get is True
+    assert event.is_post is False
+
+    event = EventSchema(**AWS_POST_EVENT_SUBSCRIPTION)
+    assert event.is_get is False
+    assert event.is_post is True
 
 
 def test_subscription_event_creation():
