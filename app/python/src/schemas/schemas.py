@@ -15,6 +15,23 @@ class SubscriptionType(StrEnum):
     CANCELLED = "subscription.cancelled"
 
 
+class SupportedMethods(StrEnum):
+    GET = "GET"
+    POST = "POST"
+
+
+class EventSchema(BaseModel):
+    httpMethod: str
+
+    @property
+    def is_get(self) -> bool:
+        return self.httpMethod == SupportedMethods.GET
+
+    @property
+    def is_post(self) -> bool:
+        return self.httpMethod == SupportedMethods.POST
+
+
 class MetadataSchema(BaseModel):
     planSku: str
     autoRenew: bool
