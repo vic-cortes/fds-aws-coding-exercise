@@ -9,6 +9,43 @@ class SubscriptionStatus(StrEnum):
     INACTIVE = "inactive"
 
 
+class SubscriptionType(StrEnum):
+    RENEWAL = "subscription.renewed"
+    CREATED = "subscription.created"
+    CANCELLED = "subscription.cancelled"
+
+
+class MetadataSchema(BaseModel):
+    planSku: str
+    autoRenew: bool
+    paymentMethod: str
+
+
+class SubscriptionEvent(BaseModel):
+    eventId: str
+    eventType: str
+    timestamp: str
+    provider: str
+    subscriptionId: str
+    paymentId: str
+    userId: str
+    customerId: str
+    expiresAt: str
+    metadata: MetadataSchema
+
+    @property
+    def is_renewal(self) -> bool:
+        return self.eventType == SubscriptionType.RENEWAL
+
+    @property
+    def is_created(self) -> bool:
+        return self.eventType == SubscriptionType.CREATED
+
+    @property
+    def is_cancelled(self) -> bool:
+        return self.eventType == SubscriptionType.CANCELLED
+
+
 class SubscriptionSchema(BaseModel):
     pk: str
     sk: str
