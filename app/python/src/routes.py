@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 
 from .schemas.schemas import EventSchema, SubscriptionEventPayload
+from .utils.response import success_response
 
 
 class Router(BaseModel):
@@ -16,7 +17,7 @@ class Router(BaseModel):
     def process_event(self) -> dict:
 
         if self.event.is_get:
-            pass
+            return success_response("GET method processed successfully")
 
         elif self.event.is_post:
             body = SubscriptionEventPayload(**self.event.body)
