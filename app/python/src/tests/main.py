@@ -2,7 +2,7 @@ import pytest
 
 from ..schemas.schemas import EventSchema, SubscriptionEvent
 
-SAMPLE_DATA = {
+CREATED_SUBSCRIPTION_EVENT = {
     "eventId": "evt_123456789",
     "eventType": "subscription.created",
     "timestamp": "2024-03-20T10:00:00Z",
@@ -160,7 +160,7 @@ def test_event_schema_get_method():
 
 
 def test_subscription_event_creation():
-    subscription_event = SubscriptionEvent(**SAMPLE_DATA)
+    subscription_event = SubscriptionEvent(**CREATED_SUBSCRIPTION_EVENT)
 
     assert subscription_event.is_created is True
     assert subscription_event.metadata.planSku == "PREMIUM_MONTHLY"

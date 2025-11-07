@@ -1,10 +1,19 @@
+from datetime import datetime, timezone
 from enum import StrEnum
 from typing import Literal
 
 from pydantic import BaseModel
 
+from ..utils.utils import parse_iso8601
+
 
 class SubscriptionStatus(StrEnum):
+    ACTIVE = "active"
+    PENDING = "pending"
+    CANCELLED = "cancelled"
+
+
+class PlanStatus(StrEnum):
     ACTIVE = "active"
     INACTIVE = "inactive"
 
@@ -48,7 +57,12 @@ class SubscriptionEvent(BaseModel):
     userId: str
     customerId: str
     expiresAt: str
+    cancelledAt: str | None
     metadata: MetadataSchema
+
+    @property
+    def _current_datetime(self) -> datetime:
+        return datetime.now(timezone.utc)
 
     @property
     def is_renewal(self) -> bool:
@@ -61,6 +75,28 @@ class SubscriptionEvent(BaseModel):
     @property
     def is_cancelled(self) -> bool:
         return self.eventType == SubscriptionType.CANCELLED
+
+    @property
+    def parse_cancelledAt(self) -> str | None:
+        if self.cancelledAt:
+            return parse_iso8601(self.cancelledAt)
+
+    @property
+    def is_pending(self) -> bool:
+        return self._current_datetime <= self.parse_cancelledAt
+
+    @property
+    def is_cancelled(self) -> bool:
+        return self._current_datetime > self.parse_cancelledAt
+
+    @property
+    def compute_status(self) -> SubscriptionStatus:
+        if not self.cancelledAt:
+            return SubscriptionStatus.ACTIVE
+        if self.is_pending:
+            return SubscriptionStatus.PENDING
+        if self.is_cancelled:
+            return SubscriptionStatus.CANCELLED
 
 
 class SubscriptionSchema(BaseModel):
