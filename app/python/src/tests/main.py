@@ -1,5 +1,6 @@
 import pytest
 
+from ..main import handler
 from ..schemas.schemas import EventSchema, SubscriptionEventPayload
 
 CREATED_SUBSCRIPTION_EVENT = {
@@ -147,6 +148,13 @@ AWS_POST_EVENT_SUBSCRIPTION = {
     "body": {"sample_key": "sample_value"},
     "isBase64Encoded": False,
 }
+
+
+def test_handler_returns_success_response():
+    event = AWS_GET_EVENT_SUBSCRIPTION
+    context = {}
+
+    response = handler(event, context)
 
 
 def test_event_schema_get_method():

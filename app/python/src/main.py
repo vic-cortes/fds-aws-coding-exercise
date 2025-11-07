@@ -1,8 +1,10 @@
-from utils.response import success_response
-
+from .routes import Router
 from .schemas.schemas import EventSchema
+from .utils.response import success_response
 
 
 def handler(event, context):
     event = EventSchema(**event)
-    return success_response("Fender Python Lambda is up and running!")
+    router = Router(event=event)
+
+    return router.process_event()

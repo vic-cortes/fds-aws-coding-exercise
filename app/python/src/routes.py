@@ -1,5 +1,6 @@
 from pydantic import BaseModel
-from schemas.schemas import EventSchema, SubscriptionEventPayload
+
+from .schemas.schemas import EventSchema, SubscriptionEventPayload
 
 
 class Router(BaseModel):
