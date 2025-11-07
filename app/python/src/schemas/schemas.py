@@ -67,7 +67,4 @@ class PlanSchema(BaseModel):
     currency: str
     billingCycle: str
     features: list
-    status: Annotated[
-        list[SubscriptionStatus],
-        SubscriptionStatus.ACTIVE | SubscriptionStatus.INACTIVE,
-    ]
+    status: list
