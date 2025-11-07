@@ -1,6 +1,6 @@
 import pytest
 
-from ..schemas.schemas import EventSchema, SubscriptionEvent
+from ..schemas.schemas import EventSchema, SubscriptionEventPayload
 
 CREATED_SUBSCRIPTION_EVENT = {
     "eventId": "evt_123456789",
@@ -160,9 +160,9 @@ def test_event_schema_get_method():
 
 
 def test_subscription_event_creation():
-    subscription_event = SubscriptionEvent(**CREATED_SUBSCRIPTION_EVENT)
+    subscription_payload = SubscriptionEventPayload(**CREATED_SUBSCRIPTION_EVENT)
 
-    assert subscription_event.is_created is True
-    assert subscription_event.metadata.planSku == "PREMIUM_MONTHLY"
-    assert subscription_event.metadata.autoRenew is True
-    assert subscription_event.metadata.paymentMethod == "CREDIT_CARD"
+    assert subscription_payload.is_created is True
+    assert subscription_payload.metadata.planSku == "PREMIUM_MONTHLY"
+    assert subscription_payload.metadata.autoRenew is True
+    assert subscription_payload.metadata.paymentMethod == "CREDIT_CARD"

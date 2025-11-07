@@ -36,6 +36,9 @@ class SupportedMethods(StrEnum):
 
 class EventSchema(BaseModel):
     httpMethod: str
+    path: str
+    body: dict | None
+    pathParameters: dict | None
 
     @property
     def is_get(self) -> bool:
@@ -52,7 +55,7 @@ class MetadataSchema(BaseModel):
     paymentMethod: str
 
 
-class SubscriptionEvent(BaseModel):
+class SubscriptionEventPayload(BaseModel):
     eventId: str
     eventType: str
     timestamp: str
