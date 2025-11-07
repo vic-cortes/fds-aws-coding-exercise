@@ -18,6 +18,11 @@ class PlanStatus(StrEnum):
     INACTIVE = "inactive"
 
 
+class BillingCycle(StrEnum):
+    MONTHLY = "monthly"
+    YEARLY = "yearly"
+
+
 class SubscriptionType(StrEnum):
     RENEWAL = "subscription.renewed"
     CREATED = "subscription.created"
@@ -102,7 +107,7 @@ class SubscriptionEvent(BaseModel):
 class SubscriptionSchema(BaseModel):
     pk: str
     sk: str
-    type: str
+    type: str = "sub"
     planSku: str
     startDate: str
     expiresAt: str
@@ -118,6 +123,6 @@ class PlanSchema(BaseModel):
     name: str
     price: float
     currency: str
-    billingCycle: str
-    features: list
-    status: Literal[SubscriptionStatus.ACTIVE, SubscriptionStatus.INACTIVE]
+    billingCycle: Literal[BillingCycle.MONTHLY, BillingCycle.YEARLY]
+    features: list[str]
+    status: Literal[PlanStatus.ACTIVE, PlanStatus.INACTIVE]

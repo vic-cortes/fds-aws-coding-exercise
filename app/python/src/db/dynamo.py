@@ -59,3 +59,15 @@ class SubscriptionTable(DynamoFender):
 
     def write(self, data: SubscriptionSchema) -> bool:
         return super().write(data.model_dump())
+
+
+class PlanTable(DynamoFender):
+    """
+    DynamoDB handler for Plan table.
+    """
+
+    __tablename__ = "FenderPlans"
+
+    def __init__(self, tablename: str = None) -> None:
+        _tablename = tablename or self.__tablename__
+        super().__init__(_tablename)
