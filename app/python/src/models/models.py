@@ -1,10 +1,14 @@
+import random
 from enum import StrEnum
 from typing import Literal
 
+from faker import Faker
 from pydantic import BaseModel
 
 from ..db.tables import DynamoFenderTables
 from ..schemas.schemas import SubscriptionEventPayload
+
+fake = Faker("es_MX")
 
 
 class BillingCycle(StrEnum):
@@ -29,7 +33,7 @@ class SubscriptionModel(BaseModel):
     attributes: dict
 
     def create(self) -> None:
-        DynamoFenderTables.SUBSCRIPTION.write(self.model_dump())
+        DynamoFenderTables.SUBSCRIPTION.write(self.model_dump(ignore_none=True))
 
 
 class PlanModel(BaseModel):
@@ -82,5 +86,27 @@ class SubscriptionAdapter(BaseModel):
 class PlanAdapter(BaseModel):
     payload: SubscriptionEventPayload
 
-    def create(self, data: PlanModel) -> None:
-        pass
+    def create(self) -> None:
+        """
+        Process subscription event payload and create plan record.
+        """
+        DEFAULT_TYPE = "plan"
+        DEFAULT_CURRENCY = "USD"
+        # Random price and currency for demonstration purposes
+        random_billing_cycle = random.choice(
+            [BillingCycle.MONTHLY, BillingCycle.YEARLY]
+        )
+        random_features = [f"feature {el}" for el in fake.random_sample()]
+        data = {
+            "pk": self.payload.metadata.planSku,
+            "sk": self.payload.metadata.paymentMethod,
+            "type": DEFAULT_TYPE,
+            "name": self.payload.plan_name,
+            "price": float(fake.numerify()),
+            "currency": DEFAULT_CURRENCY,
+            "billingCycle": random_billing_cycle,
+            "features": random_features,
+            "status": PlanStatus.ACTIVE,
+        }
+        plan_model = PlanModel(**data)
+        DynamoFenderTables.PLAN.write(plan_model.model_dump())

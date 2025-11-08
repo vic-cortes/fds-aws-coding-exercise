@@ -39,7 +39,7 @@ class DynamoFender:
                 f"Could't make connection to `{tablename}` table due `{error}`"
             )
 
-    def write(self, data: list) -> bool:
+    def write(self, data: list | dict) -> bool:
         """
         Writes data into table
         """

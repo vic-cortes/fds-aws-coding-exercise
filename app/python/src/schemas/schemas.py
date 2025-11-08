@@ -59,16 +59,12 @@ class SubscriptionEventPayload(BaseModel):
     metadata: MetadataSchema
 
     @property
-    def pk(self) -> str:
-        return self.userId
-
-    @property
-    def sk(self) -> str:
-        return self.subscriptionId
-
-    @property
     def _current_datetime(self) -> datetime:
         return datetime.now(timezone.utc)
+
+    @property
+    def plan_name(self) -> str:
+        return self.metadata.planSku.replace("_", " ").title()
 
     @property
     def is_renewal(self) -> bool:
