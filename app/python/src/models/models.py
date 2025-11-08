@@ -28,7 +28,7 @@ class SubscriptionModel(BaseModel):
     planSku: str
     startDate: str
     expiresAt: str
-    cancelledAt: str | None
+    cancelledAt: str | None = None
     lastModified: str
     attributes: dict
 
@@ -46,13 +46,17 @@ class PlanModel(BaseModel):
     billingCycle: Literal[BillingCycle.MONTHLY, BillingCycle.YEARLY]
     features: list[str]
     status: Literal[PlanStatus.ACTIVE, PlanStatus.INACTIVE]
+    lastModified: str | None = None
+
+    def create(self) -> None:
+        DynamoFenderTables.PLAN.write(self.model_dump())
 
 
 class SubscriptionAdapter(BaseModel):
     payload: SubscriptionEventPayload
 
-    def get_or_create(self) -> None:
-        DynamoFenderTables.SUBSCRIPTION.get_by_pk(self.payload.pk)
+    def get(self) -> dict:
+        return DynamoFenderTables.PLAN.get_by_pk(self.payload.metadata.planSku)
 
     def _create(self) -> None:
         """
@@ -80,13 +84,17 @@ class SubscriptionAdapter(BaseModel):
         subscription_model.create()
 
     def process(self) -> None:
-        self._create()
+        if not self.get():
+            self._create()
 
 
 class PlanAdapter(BaseModel):
     payload: SubscriptionEventPayload
 
-    def create(self) -> None:
+    def get(self) -> dict:
+        return DynamoFenderTables.PLAN.get_by_pk(self.payload.metadata.planSku)
+
+    def _create(self) -> None:
         """
         Process subscription event payload and create plan record.
         """
@@ -96,7 +104,7 @@ class PlanAdapter(BaseModel):
         random_billing_cycle = random.choice(
             [BillingCycle.MONTHLY, BillingCycle.YEARLY]
         )
-        random_features = [f"feature {el}" for el in fake.random_sample()]
+        random_features = [f"Feature {el}" for el in fake.random_sample()]
         data = {
             "pk": self.payload.metadata.planSku,
             "sk": self.payload.metadata.paymentMethod,
@@ -107,6 +115,20 @@ class PlanAdapter(BaseModel):
             "billingCycle": random_billing_cycle,
             "features": random_features,
             "status": PlanStatus.ACTIVE,
+            "lastModified": self.payload.timestamp,
         }
         plan_model = PlanModel(**data)
-        DynamoFenderTables.PLAN.write(plan_model.model_dump())
+        plan_model.create()
+
+    def process(self) -> None:
+        if not self.get():
+            return self._create()
+
+
+def process_subscription_and_plan(payload: SubscriptionEventPayload) -> None:
+    plan_adapter = PlanAdapter(payload=payload)
+    plan_adapter.process()
+
+    subscription_adapter = SubscriptionAdapter(payload=payload)
+    subscription_adapter.process()
+    return True

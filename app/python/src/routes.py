@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+from .models.models import process_subscription_and_plan
 from .schemas.schemas import EventSchema, SubscriptionEventPayload
 from .utils.response import success_response
 
@@ -12,7 +13,10 @@ class Router(BaseModel):
 
     def post_user_subscription(self, body: SubscriptionEventPayload) -> None:
         # TODO: Add DynamoDB logic to store the subscription event
-        pass
+        adapter = process_subscription_and_plan(payload=body)
+
+        if adapter:
+            return success_response("Subscription created successfully")
 
     def process_event(self) -> dict:
 
