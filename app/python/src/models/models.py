@@ -28,6 +28,9 @@ class SubscriptionModel(BaseModel):
     lastModified: str
     attributes: dict
 
+    def create(self) -> None:
+        DynamoFenderTables.SUBSCRIPTION.write(self.model_dump())
+
 
 class PlanModel(BaseModel):
     pk: str
@@ -47,9 +50,30 @@ class SubscriptionAdapter(BaseModel):
     def get_or_create(self) -> None:
         DynamoFenderTables.SUBSCRIPTION.get_by_pk(self.payload.pk)
 
-    def create(self, data: SubscriptionModel) -> None:
-        data = {"pk": self.payload.pk}
-        SubscriptionModel(**data)
+    def process(self) -> None:
+        """
+        Process subscription event payload and create subscription record.
+        """
+        DEFAULT_TYPE = "sub"
+        data = {
+            "pk": self.payload.userId,
+            "sk": self.payload.subscriptionId,
+            "type": DEFAULT_TYPE,
+            "planSku": self.payload.metadata.planSku,
+            "startDate": self.payload.timestamp,
+            "expiresAt": self.payload.expiresAt,
+            "cancelledAt": self.payload.cancelledAt,
+            "lastModified": self.payload.timestamp,
+            "attributes": {
+                "provider": self.payload.provider,
+                "paymentId": self.payload.paymentId,
+                "customerId": self.payload.customerId,
+                "autoRenew": self.payload.metadata.autoRenew,
+                "paymentMethod": self.payload.metadata.paymentMethod,
+            },
+        }
+        subscription_model = SubscriptionModel(**data)
+        subscription_model.create()
 
 
 class PlanAdapter(BaseModel):
@@ -57,11 +81,3 @@ class PlanAdapter(BaseModel):
 
     def create(self, data: PlanModel) -> None:
         pass
-
-
-class SubscriptionPlanModel(BaseModel):
-    """
-    Determines the data model for both Subscription and Plan.
-    """
-
-    payload: SubscriptionEventPayload
