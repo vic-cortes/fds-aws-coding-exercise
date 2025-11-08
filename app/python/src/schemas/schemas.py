@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from enum import StrEnum
-from typing import Literal
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -27,8 +27,8 @@ class SupportedMethods(StrEnum):
 class EventSchema(BaseModel):
     httpMethod: str
     path: str
-    body: dict | None
-    pathParameters: dict | None
+    body: Optional[dict] = None
+    pathParameters: Optional[dict] = None
 
     @property
     def is_get(self) -> bool:
@@ -55,7 +55,7 @@ class SubscriptionEventPayload(BaseModel):
     userId: str
     customerId: str
     expiresAt: str
-    cancelledAt: str | None
+    cancelledAt: Optional[str] = None
     metadata: MetadataSchema
 
     @property

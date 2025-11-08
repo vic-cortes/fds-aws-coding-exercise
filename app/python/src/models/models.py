@@ -50,7 +50,7 @@ class SubscriptionAdapter(BaseModel):
     def get_or_create(self) -> None:
         DynamoFenderTables.SUBSCRIPTION.get_by_pk(self.payload.pk)
 
-    def process(self) -> None:
+    def _create(self) -> None:
         """
         Process subscription event payload and create subscription record.
         """
@@ -74,6 +74,9 @@ class SubscriptionAdapter(BaseModel):
         }
         subscription_model = SubscriptionModel(**data)
         subscription_model.create()
+
+    def process(self) -> None:
+        self._create()
 
 
 class PlanAdapter(BaseModel):

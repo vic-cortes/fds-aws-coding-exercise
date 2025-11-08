@@ -4,7 +4,6 @@ import boto3
 from boto3.dynamodb.conditions import And, Key
 
 from ..config import IS_DEVELOPMENT, Config
-from ..schemas.schemas import SubscriptionSchema
 
 
 def serialize_dynamo(dict):
@@ -78,9 +77,6 @@ class SubscriptionTable(DynamoFender):
     def __init__(self, tablename: str = None) -> None:
         _tablename = tablename or self.__tablename__
         super().__init__(_tablename)
-
-    def write(self, data: SubscriptionSchema) -> bool:
-        return super().write(data.model_dump())
 
 
 class PlanTable(DynamoFender):
