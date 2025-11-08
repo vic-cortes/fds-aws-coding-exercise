@@ -1,7 +1,19 @@
+import json
+
 import boto3
+from boto3.dynamodb.conditions import And, Key
 
 from ..config import IS_DEVELOPMENT, Config
 from ..schemas.schemas import SubscriptionSchema
+
+
+def serialize_dynamo(dict):
+    return json.loads(json.dumps(dict, default=str_dynamo_data))
+
+
+def str_dynamo_data(obj):
+    # Coerce every object into string
+    return str(obj)
 
 
 class DynamoFender:
@@ -33,17 +45,27 @@ class DynamoFender:
         Writes data into table
         """
 
-        if not data:
-            raise ValueError("Data cannot be empty or null")
-
-        if not isinstance(data, list):
-            raise ValueError(f"Data must be type `list`, given `{type(data)}`")
+        if isinstance(data, dict):
+            data = [data]
 
         with self.table.batch_writer() as batch:
             for values in data:
                 batch.put_item(Item=values)
 
         return True
+
+    def get_by_pk(self, pk: str) -> dict:
+        response = self.table.query(KeyConditionExpression=Key("pk").eq(pk))
+        return serialize_dynamo(response["Items"])
+
+    def get_or_create(self, pk: str, sk: str) -> dict:
+        response = self.table.query(
+            KeyConditionExpression=And(Key("pk").eq(pk), Key("sk").eq(sk))
+        )
+        items = serialize_dynamo(response["Items"])
+        if items:
+            return items[0]
+        return {}
 
 
 class SubscriptionTable(DynamoFender):

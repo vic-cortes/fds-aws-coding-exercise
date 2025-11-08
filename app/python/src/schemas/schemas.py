@@ -13,16 +13,6 @@ class SubscriptionStatus(StrEnum):
     CANCELLED = "cancelled"
 
 
-class PlanStatus(StrEnum):
-    ACTIVE = "active"
-    INACTIVE = "inactive"
-
-
-class BillingCycle(StrEnum):
-    MONTHLY = "monthly"
-    YEARLY = "yearly"
-
-
 class SubscriptionType(StrEnum):
     RENEWAL = "subscription.renewed"
     CREATED = "subscription.created"
@@ -69,6 +59,14 @@ class SubscriptionEventPayload(BaseModel):
     metadata: MetadataSchema
 
     @property
+    def pk(self) -> str:
+        return self.userId
+
+    @property
+    def sk(self) -> str:
+        return self.subscriptionId
+
+    @property
     def _current_datetime(self) -> datetime:
         return datetime.now(timezone.utc)
 
@@ -105,27 +103,3 @@ class SubscriptionEventPayload(BaseModel):
             return SubscriptionStatus.PENDING
         if self.is_cancelled:
             return SubscriptionStatus.CANCELLED
-
-
-class SubscriptionSchema(BaseModel):
-    pk: str
-    sk: str
-    type: str = "sub"
-    planSku: str
-    startDate: str
-    expiresAt: str
-    cancelledAt: str | None
-    lastModified: str
-    attributes: dict
-
-
-class PlanSchema(BaseModel):
-    pk: str
-    sk: str
-    type: str
-    name: str
-    price: float
-    currency: str
-    billingCycle: Literal[BillingCycle.MONTHLY, BillingCycle.YEARLY]
-    features: list[str]
-    status: Literal[PlanStatus.ACTIVE, PlanStatus.INACTIVE]
