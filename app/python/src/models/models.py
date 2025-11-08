@@ -1,17 +1,25 @@
+from pydantic import BaseModel
+
 from ..schemas.schemas import PlanSchema, SubscriptionEventPayload, SubscriptionSchema
 
 
-class SubscriptionModel:
+class SubscriptionModel(BaseModel):
+    payload: SubscriptionEventPayload
 
     def create(self, data: SubscriptionSchema) -> None:
         pass
 
 
-class PlanModel:
+class PlanModel(BaseModel):
+    payload: SubscriptionEventPayload
 
     def create(self, data: PlanSchema) -> None:
         pass
 
 
-class SubscriptionPlanModel:
+class SubscriptionPlanModel(BaseModel):
+    """
+    Determines the data model for both Subscription and Plan.
+    """
+
     payload: SubscriptionEventPayload

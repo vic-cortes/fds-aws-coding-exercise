@@ -1,5 +1,6 @@
 import pytest
 
+from ..db.tables import DynamoFenderTables
 from ..main import handler
 from ..schemas.schemas import EventSchema, SubscriptionEventPayload
 

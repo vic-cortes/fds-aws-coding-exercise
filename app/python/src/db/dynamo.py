@@ -1,6 +1,6 @@
 import boto3
-from config import IS_DEVELOPMENT, Config
 
+from ..config import IS_DEVELOPMENT, Config
 from ..schemas.schemas import SubscriptionSchema
 
 
@@ -12,8 +12,8 @@ class DynamoFender:
     def __init__(self, tablename) -> None:
         if IS_DEVELOPMENT:
             auth_params = {
-                "aws_access_key_id": Config.AWS_KEY_ID,
-                "aws_secret_access_key": Config.AWS_KEY_SECRET,
+                "aws_access_key_id": Config.AWS_ACCESS_KEY_ID,
+                "aws_secret_access_key": Config.AWS_SECRET_ACCESS_KEY,
                 "region_name": Config.AWS_REGION_NAME,
             }
             self.dynamodb = boto3.resource("dynamodb", **auth_params)
