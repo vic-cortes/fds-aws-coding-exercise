@@ -1,9 +1,17 @@
 import pytest
 
-from ..db.tables import DynamoFenderTables
-from ..main import handler
-from ..models.models import SubscriptionAdapter
-from ..schemas.schemas import EventSchema, SubscriptionEventPayload
+try:
+    # For local development
+    from ..db.tables import DynamoFenderTables
+    from ..main import handler
+    from ..models.models import SubscriptionAdapter
+    from ..schemas.schemas import EventSchema, SubscriptionEventPayload
+except:
+    # For AWS Lambda deployment
+    from db.tables import DynamoFenderTables
+    from main import handler
+    from models.models import SubscriptionAdapter
+    from schemas.schemas import EventSchema, SubscriptionEventPayload
 
 CREATED_SUBSCRIPTION_EVENT = {
     "eventId": "evt_123456789",

@@ -4,6 +4,14 @@ mkdir .temp
 mkdir .temp/package
 
 uv pip install -r app/python/requirements.txt --target .temp/package
+pip install \
+  --platform manylinux2014_x86_64 \
+  --implementation cp \
+  --python-version 3.13 \
+  --only-binary=:all: \
+  --target .temp/package \
+  --upgrade pydantic
+
 cp -r app/python/src/. .temp/package
 
 cd .temp/package

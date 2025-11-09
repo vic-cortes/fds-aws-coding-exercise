@@ -1,8 +1,15 @@
 from pydantic import BaseModel
 
-from .models.models import process_subscription_and_plan, process_user_id
-from .schemas.schemas import EventSchema, SubscriptionEventPayload
-from .utils.response import error_response
+try:
+    # For local development
+    from .models.models import process_subscription_and_plan, process_user_id
+    from .schemas.schemas import EventSchema, SubscriptionEventPayload
+    from .utils.response import error_response
+except:
+    # For AWS Lambda deployment
+    from models.models import process_subscription_and_plan, process_user_id
+    from schemas.schemas import EventSchema, SubscriptionEventPayload
+    from utils.response import error_response
 
 
 def router_get_user_subscription(user_id: str) -> dict:

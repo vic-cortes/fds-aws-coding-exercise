@@ -2,6 +2,8 @@
 #    uv pip compile pyproject.toml -o app/python/requirements.txt
 annotated-types==0.7.0
     # via pydantic
+faker==37.12.0
+    # via fds-aws-coding-exercise (pyproject.toml)
 pydantic==2.12.4
     # via fds-aws-coding-exercise (pyproject.toml)
 pydantic-core==2.41.5
@@ -15,3 +17,5 @@ typing-extensions==4.15.0
     #   typing-inspection
 typing-inspection==0.4.2
     # via pydantic
+tzdata==2025.2
+    # via faker

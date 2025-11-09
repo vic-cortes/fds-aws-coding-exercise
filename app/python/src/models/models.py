@@ -6,10 +6,18 @@ from typing import Literal, Optional
 from faker import Faker
 from pydantic import BaseModel
 
-from ..db.tables import DynamoFenderTables
-from ..schemas.schemas import SubscriptionEventPayload
-from ..utils.response import success_response, validation_wrapper
-from ..utils.utils import parse_iso8601
+try:
+    # For local development
+    from ..db.tables import DynamoFenderTables
+    from ..schemas.schemas import SubscriptionEventPayload
+    from ..utils.response import success_response, validation_wrapper
+    from ..utils.utils import parse_iso8601
+except:
+    # For AWS Lambda deployment
+    from db.tables import DynamoFenderTables
+    from schemas.schemas import SubscriptionEventPayload
+    from utils.response import success_response, validation_wrapper
+    from utils.utils import parse_iso8601
 
 fake = Faker("es_MX")
 

@@ -4,7 +4,11 @@ from decimal import Decimal
 import boto3
 from boto3.dynamodb.conditions import And, Key
 
-from ..config import IS_DEVELOPMENT, Config
+try:
+    # For local development
+    from ..config import IS_DEVELOPMENT, Config
+except:
+    from config import IS_DEVELOPMENT, Config
 
 
 def serialize_dynamo(dict):
