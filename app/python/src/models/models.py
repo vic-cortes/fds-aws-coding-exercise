@@ -231,4 +231,4 @@ def process_user_id(user_id: str) -> dict:
     """
     subscription_adapter = SubscriptionAndPlanAdapter(user_id=user_id)
     data = subscription_adapter.retrieve()
-    print(data)
+    return success_response("User subscription retrieved successfully", data=data)

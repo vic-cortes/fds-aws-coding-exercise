@@ -5,10 +5,16 @@ from http import HTTPStatus
 from pydantic import ValidationError
 
 
-def success_response(body: str) -> dict:
+def success_response(body: str, data: dict = None) -> dict:
+
+    body = {"message": body}
+
+    if data:
+        body["data"] = data
+
     return {
         "statusCode": HTTPStatus.OK,
-        "body": json.dumps({"message": body}),
+        "body": json.dumps(body),
     }
 
 
