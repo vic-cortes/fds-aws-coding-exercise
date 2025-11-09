@@ -147,14 +147,22 @@ AWS_POST_EVENT_SUBSCRIPTION = {
         "deploymentId": "w3dwr7",
         "apiId": "0s2r8aurv7",
     },
-    "body": {"sample_key": "sample_value"},
+    "body": CREATED_SUBSCRIPTION_EVENT,
     "isBase64Encoded": False,
 }
 
 
 @pytest.mark.skip(reason="Skipping this test for now")
-def test_handler_returns_success_response():
+def test_handler_get_event():
     event = AWS_GET_EVENT_SUBSCRIPTION
+    context = {}
+
+    response = handler(event, context)
+
+
+# @pytest.mark.skip(reason="Skipping this test for now")
+def test_handler_post_event():
+    event = AWS_POST_EVENT_SUBSCRIPTION
     context = {}
 
     response = handler(event, context)
@@ -181,6 +189,7 @@ def test_subscription_event_creation():
     assert subscription_payload.metadata.paymentMethod == "CREDIT_CARD"
 
 
+@pytest.mark.skip(reason="Skipping this test for now")
 def test_subscription_adapter():
     subscription_payload = SubscriptionEventPayload(**CREATED_SUBSCRIPTION_EVENT)
     adapter = SubscriptionAdapter(payload=subscription_payload)

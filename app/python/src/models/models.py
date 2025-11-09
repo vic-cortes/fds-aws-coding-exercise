@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 from ..db.tables import DynamoFenderTables
 from ..schemas.schemas import SubscriptionEventPayload
+from ..utils.response import validation_wrapper
 
 fake = Faker("es_MX")
 
@@ -33,7 +34,7 @@ class SubscriptionModel(BaseModel):
     attributes: dict
 
     def create(self) -> None:
-        DynamoFenderTables.SUBSCRIPTION.write(self.model_dump(ignore_none=True))
+        DynamoFenderTables.SUBSCRIPTION.write(self.model_dump(exclude_none=True))
 
 
 class PlanModel(BaseModel):
@@ -83,7 +84,7 @@ class SubscriptionAdapter(BaseModel):
         subscription_model = SubscriptionModel(**data)
         subscription_model.create()
 
-    def process(self) -> None:
+    def process(self) -> bool:
         if not self.get():
             self._create()
 
@@ -125,6 +126,7 @@ class PlanAdapter(BaseModel):
             return self._create()
 
 
+@validation_wrapper
 def process_subscription_and_plan(payload: SubscriptionEventPayload) -> None:
     plan_adapter = PlanAdapter(payload=payload)
     plan_adapter.process()
