@@ -24,11 +24,15 @@ class SupportedMethods(StrEnum):
     POST = "POST"
 
 
+class UserParamsSchema(BaseModel):
+    userId: str
+
+
 class EventSchema(BaseModel):
     httpMethod: str
     path: str
     body: Optional[dict] = None
-    pathParameters: Optional[dict] = None
+    pathParameters: Optional[UserParamsSchema] = None
 
     @property
     def is_get(self) -> bool:

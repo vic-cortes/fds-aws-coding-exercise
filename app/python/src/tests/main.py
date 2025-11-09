@@ -24,7 +24,7 @@ CREATED_SUBSCRIPTION_EVENT = {
 
 AWS_GET_EVENT_SUBSCRIPTION = {
     "resource": "/api/v1/subscriptions/{userId}",
-    "path": "/api/v1/subscriptions/dummy_user",
+    "path": "/api/v1/subscriptions/123",
     "httpMethod": "GET",
     "headers": {
         "Accept": "*/*",
@@ -152,15 +152,16 @@ AWS_POST_EVENT_SUBSCRIPTION = {
 }
 
 
-@pytest.mark.skip(reason="Skipping this test for now")
+# @pytest.mark.skip(reason="Skipping this test for now")
 def test_handler_get_event():
     event = AWS_GET_EVENT_SUBSCRIPTION
     context = {}
 
     response = handler(event, context)
+    print(response)
 
 
-# @pytest.mark.skip(reason="Skipping this test for now")
+@pytest.mark.skip(reason="Skipping this test for now")
 def test_handler_post_event():
     event = AWS_POST_EVENT_SUBSCRIPTION
     context = {}

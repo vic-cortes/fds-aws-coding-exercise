@@ -56,8 +56,8 @@ class PlanModel(BaseModel):
 class SubscriptionAdapter(BaseModel):
     payload: SubscriptionEventPayload
 
-    def get(self) -> dict:
-        return DynamoFenderTables.SUBSCRIPTION.get_by_pk(self.payload.metadata.planSku)
+    def _get_by_pk(self) -> dict:
+        return DynamoFenderTables.SUBSCRIPTION.get_by_pk(self.payload.userId)
 
     def _create(self) -> None:
         """
@@ -85,14 +85,17 @@ class SubscriptionAdapter(BaseModel):
         subscription_model.create()
 
     def process(self) -> bool:
-        if not self.get():
+        if not self._get_by_pk():
             self._create()
+
+    def retrieve(self) -> dict:
+        data = self._get_by_pk()
 
 
 class PlanAdapter(BaseModel):
     payload: SubscriptionEventPayload
 
-    def get(self) -> dict:
+    def _get_by_pk(self) -> dict:
         return DynamoFenderTables.PLAN.get_by_pk(self.payload.metadata.planSku)
 
     def _create(self) -> None:
@@ -122,8 +125,30 @@ class PlanAdapter(BaseModel):
         plan_model.create()
 
     def process(self) -> None:
-        if not self.get():
+        if not self._get_by_pk():
             return self._create()
+
+
+class SubscriptionAndPlanAdapter(BaseModel):
+    user_id: str
+
+    def _get_sub_by_pk(self) -> SubscriptionModel:
+        if not (
+            subscription := DynamoFenderTables.SUBSCRIPTION.get_by_pk(self.user_id)
+        ):
+            raise ValueError("Subscription not found")
+
+        return SubscriptionModel(**subscription[0])
+
+    def _get_plan_by_pk(self, plan_sku: str) -> dict:
+        if not (plan := DynamoFenderTables.PLAN.get_by_pk(plan_sku)):
+            raise ValueError("Plan not found")
+
+        return PlanModel(**plan[0])
+
+    def retrieve(self) -> dict:
+        subscription = self._get_sub_by_pk()
+        plan = self._get_plan_by_pk(subscription.planSku)
 
 
 @validation_wrapper
@@ -134,3 +159,13 @@ def process_subscription_and_plan(payload: SubscriptionEventPayload) -> None:
     subscription_adapter = SubscriptionAdapter(payload=payload)
     subscription_adapter.process()
     return success_response("Subscription and Plan processed successfully")
+
+
+@validation_wrapper
+def process_user_id(user_id: str) -> dict:
+    """
+    Fetch user subscription by user ID.
+    """
+    subscription_adapter = SubscriptionAndPlanAdapter(user_id=user_id)
+    data = subscription_adapter.retrieve()
+    print(data)
