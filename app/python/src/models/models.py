@@ -57,7 +57,7 @@ class SubscriptionAdapter(BaseModel):
     payload: SubscriptionEventPayload
 
     def get(self) -> dict:
-        return DynamoFenderTables.PLAN.get_by_pk(self.payload.metadata.planSku)
+        return DynamoFenderTables.SUBSCRIPTION.get_by_pk(self.payload.metadata.planSku)
 
     def _create(self) -> None:
         """

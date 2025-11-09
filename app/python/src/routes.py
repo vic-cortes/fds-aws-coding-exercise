@@ -2,26 +2,29 @@ from pydantic import BaseModel
 
 from .models.models import process_subscription_and_plan
 from .schemas.schemas import EventSchema, SubscriptionEventPayload
-from .utils.response import success_response
+from .utils.response import error_response
+
+
+def get_user_subscription(user_id: str) -> dict:
+    return {}
+
+
+def post_user_subscription(body: SubscriptionEventPayload) -> dict:
+    return process_subscription_and_plan(payload=body)
 
 
 class Router(BaseModel):
     event: EventSchema
 
-    def get_user_subscription(self) -> str | None:
-        pass
-
-    def post_user_subscription(self, body: SubscriptionEventPayload) -> dict:
-        return process_subscription_and_plan(payload=body)
-
     def process_event(self) -> dict:
 
         if self.event.is_get:
-            return success_response("GET method processed successfully")
+            user_id = self.event.pathParameters.get("userId")
+            return get_user_subscription(user_id=user_id)
 
         elif self.event.is_post:
             body = SubscriptionEventPayload(**self.event.body)
-            return self.post_user_subscription(body=body)
+            return post_user_subscription(body=body)
 
         else:
-            raise ValueError("Unsupported HTTP method")
+            return error_response("Unsupported HTTP method", status_code=405)

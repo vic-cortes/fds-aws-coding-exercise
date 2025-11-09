@@ -50,7 +50,7 @@ AWS_GET_EVENT_SUBSCRIPTION = {
     },
     "queryStringParameters": None,
     "multiValueQueryStringParameters": None,
-    "pathParameters": {"userId": "dummy_user"},
+    "pathParameters": {"userId": "123"},
     "stageVariables": None,
     "requestContext": {
         "resourceId": "xxxxyyy",
@@ -114,7 +114,7 @@ AWS_POST_EVENT_SUBSCRIPTION = {
     },
     "queryStringParameters": None,
     "multiValueQueryStringParameters": None,
-    "pathParameters": {"userId": "dummy_user"},
+    "pathParameters": None,
     "stageVariables": None,
     "requestContext": {
         "resourceId": "xxxxyyy",
