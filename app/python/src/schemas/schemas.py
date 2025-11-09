@@ -1,16 +1,7 @@
-from datetime import datetime, timezone
 from enum import StrEnum
 from typing import Optional
 
 from pydantic import BaseModel
-
-from ..utils.utils import parse_iso8601
-
-
-class SubscriptionStatus(StrEnum):
-    ACTIVE = "active"
-    PENDING = "pending"
-    CANCELLED = "cancelled"
 
 
 class SubscriptionType(StrEnum):
@@ -63,10 +54,6 @@ class SubscriptionEventPayload(BaseModel):
     metadata: MetadataSchema
 
     @property
-    def _current_datetime(self) -> datetime:
-        return datetime.now(timezone.utc)
-
-    @property
     def plan_name(self) -> str:
         return self.metadata.planSku.replace("_", " ").title()
 
@@ -81,25 +68,3 @@ class SubscriptionEventPayload(BaseModel):
     @property
     def is_cancelled(self) -> bool:
         return self.eventType == SubscriptionType.CANCELLED
-
-    @property
-    def parse_cancelledAt(self) -> str | None:
-        if self.cancelledAt:
-            return parse_iso8601(self.cancelledAt)
-
-    @property
-    def is_pending(self) -> bool:
-        return self._current_datetime <= self.parse_cancelledAt
-
-    @property
-    def is_cancelled(self) -> bool:
-        return self._current_datetime > self.parse_cancelledAt
-
-    @property
-    def compute_status(self) -> SubscriptionStatus:
-        if not self.cancelledAt:
-            return SubscriptionStatus.ACTIVE
-        if self.is_pending:
-            return SubscriptionStatus.PENDING
-        if self.is_cancelled:
-            return SubscriptionStatus.CANCELLED

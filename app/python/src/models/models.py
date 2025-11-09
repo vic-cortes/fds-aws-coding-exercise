@@ -1,6 +1,7 @@
 import random
+from datetime import datetime, timezone
 from enum import StrEnum
-from typing import Literal
+from typing import Literal, Optional
 
 from faker import Faker
 from pydantic import BaseModel
@@ -8,8 +9,15 @@ from pydantic import BaseModel
 from ..db.tables import DynamoFenderTables
 from ..schemas.schemas import SubscriptionEventPayload
 from ..utils.response import success_response, validation_wrapper
+from ..utils.utils import parse_iso8601
 
 fake = Faker("es_MX")
+
+
+class SubscriptionStatus(StrEnum):
+    ACTIVE = "active"
+    PENDING = "pending"
+    CANCELLED = "cancelled"
 
 
 class BillingCycle(StrEnum):
@@ -22,6 +30,15 @@ class PlanStatus(StrEnum):
     INACTIVE = "inactive"
 
 
+class SubscriptionAttributes(BaseModel):
+    # Adding as optional in case some attributes are missing
+    provider: Optional[str] = None
+    paymentId: Optional[str] = None
+    customerId: Optional[str] = None
+    autoRenew: Optional[bool] = None
+    paymentMethod: Optional[str] = None
+
+
 class SubscriptionModel(BaseModel):
     pk: str
     sk: str
@@ -31,10 +48,35 @@ class SubscriptionModel(BaseModel):
     expiresAt: str
     cancelledAt: str | None = None
     lastModified: str
-    attributes: dict
+    attributes: SubscriptionAttributes | None = None
 
     def create(self) -> None:
         DynamoFenderTables.SUBSCRIPTION.write(self.model_dump(exclude_none=True))
+
+    @property
+    def _current_datetime(self) -> datetime:
+        return datetime.now(timezone.utc)
+
+    @property
+    def parse_cancelledAt(self) -> str | None:
+        if self.cancelledAt:
+            return parse_iso8601(self.cancelledAt)
+
+    @property
+    def is_pending(self) -> bool:
+        return self._current_datetime <= self.parse_cancelledAt
+
+    @property
+    def is_cancelled(self) -> bool:
+        return self._current_datetime > self.parse_cancelledAt
+
+    def compute_status(self) -> SubscriptionStatus:
+        if not self.cancelledAt:
+            return SubscriptionStatus.ACTIVE
+        if self.is_pending:
+            return SubscriptionStatus.PENDING
+        if self.is_cancelled:
+            return SubscriptionStatus.CANCELLED
 
 
 class PlanModel(BaseModel):
@@ -140,7 +182,7 @@ class SubscriptionAndPlanAdapter(BaseModel):
 
         return SubscriptionModel(**subscription[0])
 
-    def _get_plan_by_pk(self, plan_sku: str) -> dict:
+    def _get_plan_by_pk(self, plan_sku: str) -> PlanModel:
         if not (plan := DynamoFenderTables.PLAN.get_by_pk(plan_sku)):
             raise ValueError("Plan not found")
 
@@ -149,6 +191,27 @@ class SubscriptionAndPlanAdapter(BaseModel):
     def retrieve(self) -> dict:
         subscription = self._get_sub_by_pk()
         plan = self._get_plan_by_pk(subscription.planSku)
+
+        return {
+            "userId": subscription.pk,
+            "subscriptionId": subscription.sk,
+            "plan": {
+                "sku": plan.pk,
+                "name": plan.name,
+                "price": plan.price,
+                "currency": plan.currency,
+                "billingCycle": plan.billingCycle,
+                "features": plan.features,
+            },
+            "startDate": subscription.startDate,
+            "expiresAt": subscription.expiresAt,
+            "cancelledAt": subscription.cancelledAt,
+            "status": subscription.compute_status(),
+            "attributes": {
+                "autoRenew": subscription.attributes.autoRenew,
+                "paymentMethod": subscription.attributes.paymentMethod,
+            },
+        }
 
 
 @validation_wrapper
