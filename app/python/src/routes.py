@@ -11,12 +11,8 @@ class Router(BaseModel):
     def get_user_subscription(self) -> str | None:
         pass
 
-    def post_user_subscription(self, body: SubscriptionEventPayload) -> None:
-        # TODO: Add DynamoDB logic to store the subscription event
-        adapter = process_subscription_and_plan(payload=body)
-
-        if adapter:
-            return success_response("Subscription created successfully")
+    def post_user_subscription(self, body: SubscriptionEventPayload) -> dict:
+        return process_subscription_and_plan(payload=body)
 
     def process_event(self) -> dict:
 
@@ -25,7 +21,7 @@ class Router(BaseModel):
 
         elif self.event.is_post:
             body = SubscriptionEventPayload(**self.event.body)
-            self.post_user_subscription(body=body)
+            return self.post_user_subscription(body=body)
 
         else:
             raise ValueError("Unsupported HTTP method")

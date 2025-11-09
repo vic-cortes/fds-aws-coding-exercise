@@ -1,4 +1,5 @@
 import json
+from decimal import Decimal
 
 import boto3
 from boto3.dynamodb.conditions import And, Key
@@ -13,6 +14,17 @@ def serialize_dynamo(dict):
 def str_dynamo_data(obj):
     # Coerce every object into string
     return str(obj)
+
+
+def dynamo_write_serializer(dict: dict) -> dict:
+    """
+    Serialize data before writing into DynamoDB
+    """
+    for key, value in dict.items():
+        if isinstance(value, float):
+            dict[key] = Decimal(str(value))
+
+    return dict
 
 
 class DynamoFender:
@@ -49,7 +61,8 @@ class DynamoFender:
 
         with self.table.batch_writer() as batch:
             for values in data:
-                batch.put_item(Item=values)
+                serialized_values = dynamo_write_serializer(values)
+                batch.put_item(Item=serialized_values)
 
         return True
 

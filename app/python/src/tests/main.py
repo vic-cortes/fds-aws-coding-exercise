@@ -166,6 +166,7 @@ def test_handler_post_event():
     context = {}
 
     response = handler(event, context)
+    print(response)
 
 
 @pytest.mark.skip(reason="Skipping this test for now")

@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 from ..db.tables import DynamoFenderTables
 from ..schemas.schemas import SubscriptionEventPayload
-from ..utils.response import validation_wrapper
+from ..utils.response import success_response, validation_wrapper
 
 fake = Faker("es_MX")
 
@@ -133,4 +133,4 @@ def process_subscription_and_plan(payload: SubscriptionEventPayload) -> None:
 
     subscription_adapter = SubscriptionAdapter(payload=payload)
     subscription_adapter.process()
-    return True
+    return success_response("Subscription and Plan processed successfully")
