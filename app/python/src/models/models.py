@@ -65,18 +65,18 @@ class SubscriptionModel(BaseModel):
     def _current_datetime(self) -> datetime:
         return datetime.now(timezone.utc)
 
-    @property
-    def parse_cancelledAt(self) -> str | None:
-        if self.cancelledAt:
-            return parse_iso8601(self.cancelledAt)
+    def parse_cancelled_at(self) -> str:
+        if not self.cancelledAt:
+            raise ValueError("cancelledAt is None")
+        return parse_iso8601(self.cancelledAt)
 
     @property
     def is_pending(self) -> bool:
-        return self._current_datetime <= self.parse_cancelledAt
+        return self._current_datetime <= self.parse_cancelled_at()
 
     @property
     def is_cancelled(self) -> bool:
-        return self._current_datetime > self.parse_cancelledAt
+        return self._current_datetime > self.parse_cancelled_at()
 
     def compute_status(self) -> SubscriptionStatus:
         if not self.cancelledAt:
@@ -224,11 +224,12 @@ class SubscriptionAndPlanAdapter(BaseModel):
 
 @validation_wrapper
 def process_subscription_and_plan(payload: SubscriptionEventPayload) -> None:
+    subscription_adapter = SubscriptionAdapter(payload=payload)
+    subscription_adapter.process()
+
     plan_adapter = PlanAdapter(payload=payload)
     plan_adapter.process()
 
-    subscription_adapter = SubscriptionAdapter(payload=payload)
-    subscription_adapter.process()
     return success_response("Subscription and Plan processed successfully")
 
 
