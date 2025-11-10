@@ -65,6 +65,7 @@ CANCELLED_SUBSCRIPTION_EVENT = {
     },
 }
 
+
 AWS_GET_EVENT_SUBSCRIPTION = {
     "resource": "/api/v1/subscriptions/{userId}",
     "path": "/api/v1/subscriptions/123",
@@ -129,84 +130,92 @@ AWS_GET_EVENT_SUBSCRIPTION = {
     "body": None,
     "isBase64Encoded": False,
 }
-AWS_POST_EVENT_SUBSCRIPTION = {
-    "resource": "/api/v1/subscriptions/{userId}",
-    "path": "/api/v1/subscriptions/dummy_user",
-    "httpMethod": "POST",
-    "headers": {
-        "Accept": "*/*",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Host": "0s2r8aurv7.execute-api.us-east-1.amazonaws.com",
-        "Postman-Token": "fa1c9874-89e9-4277-a5b1-e65017947519",
-        "User-Agent": "PostmanRuntime/7.49.1",
-        "X-Amzn-Trace-Id": "Root=1-690d790f-52e7f1510ea0af3242a5d1d6",
-        "X-Forwarded-For": "189.179.129.75",
-        "X-Forwarded-Port": "443",
-        "X-Forwarded-Proto": "https",
-    },
-    "multiValueHeaders": {
-        "Accept": ["*/*"],
-        "Accept-Encoding": ["gzip, deflate, br"],
-        "Host": ["0s2r8aurv7.execute-api.us-east-1.amazonaws.com"],
-        "Postman-Token": ["fa1c9874-89e9-4277-a5b1-e65017947519"],
-        "User-Agent": ["PostmanRuntime/7.49.1"],
-        "X-Amzn-Trace-Id": ["Root=1-690d790f-52e7f1510ea0af3242a5d1d6"],
-        "X-Forwarded-For": ["189.179.129.75"],
-        "X-Forwarded-Port": ["443"],
-        "X-Forwarded-Proto": ["https"],
-    },
-    "queryStringParameters": None,
-    "multiValueQueryStringParameters": None,
-    "pathParameters": None,
-    "stageVariables": None,
-    "requestContext": {
-        "resourceId": "xxxxyyy",
-        "resourcePath": "/api/v1/subscriptions/{userId}",
-        "httpMethod": "GET",
-        "extendedRequestId": "Tp_ajGsBoAMEdCw=",
-        "requestTime": "07/Nov/2025:04:43:59 +0000",
-        "path": "/dev/api/v1/subscriptions/dummy_user",
-        "accountId": "929676127859",
-        "protocol": "HTTP/1.1",
-        "stage": "dev",
-        "domainPrefix": "xxxxxyyy",
-        "requestTimeEpoch": 1762490639902,
-        "requestId": "fb9a86bd-d6cf-4812-b69d-21f3ce009155",
-        "identity": {
-            "cognitoIdentityPoolId": None,
-            "accountId": None,
-            "cognitoIdentityId": None,
-            "caller": None,
-            "sourceIp": "189.179.129.75",
-            "principalOrgId": None,
-            "accessKey": None,
-            "cognitoAuthenticationType": None,
-            "cognitoAuthenticationProvider": None,
-            "userArn": None,
-            "userAgent": "PostmanRuntime/7.49.1",
-            "user": None,
+
+
+def base_aws_post_event(event_body: dict) -> dict:
+    return {
+        "resource": "/api/v1/subscriptions/{userId}",
+        "path": "/api/v1/subscriptions/dummy_user",
+        "httpMethod": "POST",
+        "headers": {
+            "Accept": "*/*",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Host": "0s2r8aurv7.execute-api.us-east-1.amazonaws.com",
+            "Postman-Token": "fa1c9874-89e9-4277-a5b1-e65017947519",
+            "User-Agent": "PostmanRuntime/7.49.1",
+            "X-Amzn-Trace-Id": "Root=1-690d790f-52e7f1510ea0af3242a5d1d6",
+            "X-Forwarded-For": "189.179.129.75",
+            "X-Forwarded-Port": "443",
+            "X-Forwarded-Proto": "https",
         },
-        "domainName": "0s2r8aurv7.execute-api.us-east-1.amazonaws.com",
-        "deploymentId": "w3dwr7",
-        "apiId": "0s2r8aurv7",
-    },
-    "body": CREATED_SUBSCRIPTION_EVENT,
-    "isBase64Encoded": False,
-}
+        "multiValueHeaders": {
+            "Accept": ["*/*"],
+            "Accept-Encoding": ["gzip, deflate, br"],
+            "Host": ["0s2r8aurv7.execute-api.us-east-1.amazonaws.com"],
+            "Postman-Token": ["fa1c9874-89e9-4277-a5b1-e65017947519"],
+            "User-Agent": ["PostmanRuntime/7.49.1"],
+            "X-Amzn-Trace-Id": ["Root=1-690d790f-52e7f1510ea0af3242a5d1d6"],
+            "X-Forwarded-For": ["189.179.129.75"],
+            "X-Forwarded-Port": ["443"],
+            "X-Forwarded-Proto": ["https"],
+        },
+        "queryStringParameters": None,
+        "multiValueQueryStringParameters": None,
+        "pathParameters": None,
+        "stageVariables": None,
+        "requestContext": {
+            "resourceId": "xxxxyyy",
+            "resourcePath": "/api/v1/subscriptions/{userId}",
+            "httpMethod": "GET",
+            "extendedRequestId": "Tp_ajGsBoAMEdCw=",
+            "requestTime": "07/Nov/2025:04:43:59 +0000",
+            "path": "/dev/api/v1/subscriptions/dummy_user",
+            "accountId": "929676127859",
+            "protocol": "HTTP/1.1",
+            "stage": "dev",
+            "domainPrefix": "xxxxxyyy",
+            "requestTimeEpoch": 1762490639902,
+            "requestId": "fb9a86bd-d6cf-4812-b69d-21f3ce009155",
+            "identity": {
+                "cognitoIdentityPoolId": None,
+                "accountId": None,
+                "cognitoIdentityId": None,
+                "caller": None,
+                "sourceIp": "189.179.129.75",
+                "principalOrgId": None,
+                "accessKey": None,
+                "cognitoAuthenticationType": None,
+                "cognitoAuthenticationProvider": None,
+                "userArn": None,
+                "userAgent": "PostmanRuntime/7.49.1",
+                "user": None,
+            },
+            "domainName": "0s2r8aurv7.execute-api.us-east-1.amazonaws.com",
+            "deploymentId": "w3dwr7",
+            "apiId": "0s2r8aurv7",
+        },
+        "body": event_body,
+        "isBase64Encoded": False,
+    }
 
 
-@pytest.mark.skip(reason="Skipping this test for now")
-def test_handler_get_event():
-    event = AWS_GET_EVENT_SUBSCRIPTION
+AWS_POST_EVENT_CREATE_SUBSCRIPTION = base_aws_post_event(CREATED_SUBSCRIPTION_EVENT)
+AWS_POST_EVENT_RENEW_SUBSCRIPTION = base_aws_post_event(RENEWED_SUBSCRIPTION_EVENT)
+AWS_POST_EVENT_CANCEL_SUBSCRIPTION = base_aws_post_event(CANCELLED_SUBSCRIPTION_EVENT)
+
+
+# @pytest.mark.skip(reason="Skipping this test for now")
+def test_handler_post_event():
+    event = AWS_POST_EVENT_CREATE_SUBSCRIPTION
     context = {}
 
     response = handler(event, context)
     print(response)
 
 
-# @pytest.mark.skip(reason="Skipping this test for now")
-def test_handler_post_event():
-    event = AWS_POST_EVENT_SUBSCRIPTION
+@pytest.mark.skip(reason="Skipping this test for now")
+def test_handler_get_event():
+    event = AWS_GET_EVENT_SUBSCRIPTION
     context = {}
 
     response = handler(event, context)
@@ -219,7 +228,7 @@ def test_event_schema_get_method():
     assert event.is_get is True
     assert event.is_post is False
 
-    event = EventSchema(**AWS_POST_EVENT_SUBSCRIPTION)
+    event = EventSchema(**AWS_POST_EVENT_CREATE_SUBSCRIPTION)
     assert event.is_get is False
     assert event.is_post is True
 

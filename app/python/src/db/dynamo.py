@@ -93,15 +93,24 @@ class DynamoFender:
         """
         Updates DB in dynamo
         """
+        pk_value = data.get(PK_FIELD)
+        sk_value = data.get(SK_FIELD)
 
-        if PK_FIELD not in data.keys() or not (pk_value := data.get(PK_FIELD)):
+        if PK_FIELD not in data.keys() or not pk_value:
             raise ValueError(f"`pk` is mandatory")
+
+        if SK_FIELD not in data.keys() or not sk_value:
+            raise ValueError(f"`sk` is mandatory")
 
         # Convert dict to value field
         attributes = self._convert_updatable_dict(data)
 
         return self.table.update_item(
-            Key={PK_FIELD: pk_value}, AttributeUpdates=attributes
+            Key={
+                PK_FIELD: pk_value,
+                SK_FIELD: sk_value,
+            },
+            AttributeUpdates=attributes,
         )
 
     def get_by_pk(self, pk: str) -> dict:

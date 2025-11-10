@@ -130,6 +130,10 @@ class SubscriptionAdapter(BaseModel):
                 "paymentMethod": self.payload.metadata.paymentMethod,
             },
         }
+
+        if self.payload.is_cancelled:
+            data["cancelledAt"] = self.payload.cancelledAt
+
         subscription_model = SubscriptionModel(**data)
         subscription_model.create()
 
@@ -139,11 +143,12 @@ class SubscriptionAdapter(BaseModel):
         """
         update_dict = {
             "pk": self.payload.userId,
+            "sk": self.payload.subscriptionId,
             "lastModified": self.payload.timestamp,
             "expiresAt": self.payload.expiresAt,
+            "internalStatus": SubscriptionStatus.ACTIVE,
         }
         DynamoFenderTables.SUBSCRIPTION.update(update_dict)
-        return
 
     def _update_cancelled(self) -> None:
         """
@@ -151,9 +156,11 @@ class SubscriptionAdapter(BaseModel):
         """
         update_dict = {
             "pk": self.payload.userId,
+            "sk": self.payload.subscriptionId,
             "lastModified": self.payload.timestamp,
             "expiresAt": self.payload.expiresAt,
             "cancelledAt": self.payload.cancelledAt,
+            "internalStatus": SubscriptionStatus.CANCELLED,
         }
         DynamoFenderTables.SUBSCRIPTION.update(update_dict)
 
@@ -230,7 +237,7 @@ class SubscriptionAndPlanAdapter(BaseModel):
         subscription = self._get_sub_by_pk()
         plan = self._get_plan_by_pk(subscription.planSku)
 
-        return {
+        data = {
             "userId": subscription.pk,
             "subscriptionId": subscription.sk,
             "plan": {
@@ -243,13 +250,17 @@ class SubscriptionAndPlanAdapter(BaseModel):
             },
             "startDate": subscription.startDate,
             "expiresAt": subscription.expiresAt,
-            "cancelledAt": subscription.cancelledAt,
             "status": subscription.compute_status(),
             "attributes": {
                 "autoRenew": subscription.attributes.autoRenew,
                 "paymentMethod": subscription.attributes.paymentMethod,
             },
         }
+
+        if subscription.cancelledAt:
+            data["cancelledAt"] = subscription.cancelledAt
+
+        return data
 
 
 @validation_wrapper
