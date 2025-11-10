@@ -47,7 +47,7 @@ class SubscriptionEventPayload(BaseModel):
     timestamp: str
     provider: str
     subscriptionId: str
-    paymentId: str
+    paymentId: Optional[str] = None
     userId: str
     customerId: str
     expiresAt: str

@@ -72,11 +72,11 @@ class SubscriptionModel(BaseModel):
 
     @property
     def is_pending(self) -> bool:
-        return self.last_date_modified <= self.parse_cancelled_at()
+        return self.last_date_modified < self.parse_cancelled_at()
 
     @property
     def is_cancelled(self) -> bool:
-        return self.last_date_modified > self.parse_cancelled_at()
+        return self.last_date_modified >= self.parse_cancelled_at()
 
     def compute_status(self) -> SubscriptionStatus:
         if not self.cancelledAt:

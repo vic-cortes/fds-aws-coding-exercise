@@ -205,12 +205,23 @@ AWS_POST_EVENT_CANCEL_SUBSCRIPTION = base_aws_post_event(CANCELLED_SUBSCRIPTION_
 
 
 # @pytest.mark.skip(reason="Skipping this test for now")
-def test_handler_post_event():
-    event = AWS_POST_EVENT_CREATE_SUBSCRIPTION
+def test_handler_event():
+    event_get = AWS_GET_EVENT_SUBSCRIPTION
+    event_created = AWS_POST_EVENT_CREATE_SUBSCRIPTION
     context = {}
 
-    response = handler(event, context)
-    print(response)
+    response_created = handler(event_created, context)
+    response_get = handler(event_get, context)
+
+    event_renewed = AWS_POST_EVENT_RENEW_SUBSCRIPTION
+    response_renewed = handler(event_renewed, context)
+    response_get = handler(event_get, context)
+
+    event_cancelled = AWS_POST_EVENT_CANCEL_SUBSCRIPTION
+    response_cancelled = handler(event_cancelled, context)
+    response_get = handler(event_get, context)
+
+    print(response_get)
 
 
 @pytest.mark.skip(reason="Skipping this test for now")

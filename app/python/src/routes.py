@@ -6,12 +6,12 @@ try:
     # For local development
     from .models.models import process_subscription_and_plan, process_user_id
     from .schemas.schemas import EventSchema, SubscriptionEventPayload
-    from .utils.response import error_response
+    from .utils.response import error_response, validation_wrapper
 except:
     # For AWS Lambda deployment
     from models.models import process_subscription_and_plan, process_user_id
     from schemas.schemas import EventSchema, SubscriptionEventPayload
-    from utils.response import error_response
+    from utils.response import error_response, validation_wrapper
 
 
 # /api/v1/subscriptions/{userId}
@@ -33,6 +33,7 @@ def router_post_user_subscription(body: SubscriptionEventPayload) -> dict:
 class Router(BaseModel):
     event: EventSchema
 
+    @validation_wrapper
     def process_event(self) -> dict:
 
         if self.event.is_get:
