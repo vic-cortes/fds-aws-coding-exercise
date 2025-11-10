@@ -29,6 +29,41 @@ CREATED_SUBSCRIPTION_EVENT = {
         "paymentMethod": "CREDIT_CARD",
     },
 }
+RENEWED_SUBSCRIPTION_EVENT = {
+    "eventId": "evt_987654321",
+    "eventType": "subscription.renewed",
+    "timestamp": "2024-04-20T10:00:00Z",
+    "provider": "STRIPE",
+    "subscriptionId": "sub_456789",
+    "paymentId": "pm_654321",
+    "userId": "123",
+    "customerId": "cus_789012",
+    "expiresAt": "2024-05-20T10:00:00Z",
+    "metadata": {
+        "planSku": "PREMIUM_MONTHLY",
+        "autoRenew": True,
+        "paymentMethod": "CREDIT_CARD",
+    },
+}
+
+CANCELLED_SUBSCRIPTION_EVENT = {
+    "eventId": "evt_456789123",
+    "eventType": "subscription.cancelled",
+    "timestamp": "2024-05-20T10:00:00Z",
+    "provider": "STRIPE",
+    "subscriptionId": "sub_456789",
+    "paymentId": None,
+    "userId": "123",
+    "customerId": "cus_789012",
+    "expiresAt": "2024-05-20T10:00:00Z",
+    "cancelledAt": "2024-05-20T10:00:00Z",
+    "metadata": {
+        "planSku": "PREMIUM_MONTHLY",
+        "autoRenew": False,
+        "paymentMethod": "CREDIT_CARD",
+        "cancelReason": "USER_REQUESTED",
+    },
+}
 
 AWS_GET_EVENT_SUBSCRIPTION = {
     "resource": "/api/v1/subscriptions/{userId}",
@@ -160,7 +195,7 @@ AWS_POST_EVENT_SUBSCRIPTION = {
 }
 
 
-# @pytest.mark.skip(reason="Skipping this test for now")
+@pytest.mark.skip(reason="Skipping this test for now")
 def test_handler_get_event():
     event = AWS_GET_EVENT_SUBSCRIPTION
     context = {}
@@ -169,7 +204,7 @@ def test_handler_get_event():
     print(response)
 
 
-@pytest.mark.skip(reason="Skipping this test for now")
+# @pytest.mark.skip(reason="Skipping this test for now")
 def test_handler_post_event():
     event = AWS_POST_EVENT_SUBSCRIPTION
     context = {}

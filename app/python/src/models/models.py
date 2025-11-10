@@ -62,21 +62,21 @@ class SubscriptionModel(BaseModel):
         DynamoFenderTables.SUBSCRIPTION.write(self.model_dump(exclude_none=True))
 
     @property
-    def _current_datetime(self) -> datetime:
-        return datetime.now(timezone.utc)
+    def last_date_modified(self) -> datetime:
+        return parse_iso8601(self.lastModified)
 
     def parse_cancelled_at(self) -> str:
         if not self.cancelledAt:
             raise ValueError("cancelledAt is None")
-        return parse_iso8601(self.cancelledAt)
+        return parse_iso8601(self.expiresAt)
 
     @property
     def is_pending(self) -> bool:
-        return self._current_datetime <= self.parse_cancelled_at()
+        return self.last_date_modified <= self.parse_cancelled_at()
 
     @property
     def is_cancelled(self) -> bool:
-        return self._current_datetime > self.parse_cancelled_at()
+        return self.last_date_modified > self.parse_cancelled_at()
 
     def compute_status(self) -> SubscriptionStatus:
         if not self.cancelledAt:
@@ -121,7 +121,6 @@ class SubscriptionAdapter(BaseModel):
             "planSku": self.payload.metadata.planSku,
             "startDate": self.payload.timestamp,
             "expiresAt": self.payload.expiresAt,
-            "cancelledAt": self.payload.cancelledAt,
             "lastModified": self.payload.timestamp,
             "attributes": {
                 "provider": self.payload.provider,
@@ -134,12 +133,43 @@ class SubscriptionAdapter(BaseModel):
         subscription_model = SubscriptionModel(**data)
         subscription_model.create()
 
-    def process(self) -> bool:
-        if not self._get_by_pk():
-            self._create()
+    def _update_renewal(self) -> None:
+        """
+        Update plan on renewal if needed.
+        """
+        update_dict = {
+            "pk": self.payload.userId,
+            "lastModified": self.payload.timestamp,
+            "expiresAt": self.payload.expiresAt,
+        }
+        DynamoFenderTables.SUBSCRIPTION.update(update_dict)
+        return
 
-    def retrieve(self) -> dict:
-        data = self._get_by_pk()
+    def _update_cancelled(self) -> None:
+        """
+        Update plan on renewal if needed.
+        """
+        update_dict = {
+            "pk": self.payload.userId,
+            "lastModified": self.payload.timestamp,
+            "expiresAt": self.payload.expiresAt,
+            "cancelledAt": self.payload.cancelledAt,
+        }
+        DynamoFenderTables.SUBSCRIPTION.update(update_dict)
+
+    def process(self) -> None:
+        """
+        Process subscription event payload.
+        """
+        if not self._get_by_pk():
+            return self._create()
+
+        if self.payload.is_renewal:
+            # Add logic to update plan if needed on renewal
+            return self._update_renewal()
+        elif self.payload.is_cancelled:
+            # Add logic to update plan if needed on cancellation
+            return self._update_cancelled()
 
 
 class PlanAdapter(BaseModel):
@@ -196,7 +226,7 @@ class SubscriptionAndPlanAdapter(BaseModel):
 
         return PlanModel(**plan[0])
 
-    def retrieve(self) -> dict:
+    def process(self) -> dict:
         subscription = self._get_sub_by_pk()
         plan = self._get_plan_by_pk(subscription.planSku)
 
@@ -239,5 +269,5 @@ def process_user_id(user_id: str) -> dict:
     Fetch user subscription by user ID.
     """
     subscription_adapter = SubscriptionAndPlanAdapter(user_id=user_id)
-    data = subscription_adapter.retrieve()
+    data = subscription_adapter.process()
     return success_response("User subscription retrieved successfully", data=data)

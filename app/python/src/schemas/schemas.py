@@ -38,6 +38,7 @@ class MetadataSchema(BaseModel):
     planSku: str
     autoRenew: bool
     paymentMethod: str
+    cancelReason: Optional[str] = None
 
 
 class SubscriptionEventPayload(BaseModel):

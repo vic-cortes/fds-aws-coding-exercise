@@ -31,6 +31,10 @@ def dynamo_write_serializer(dict: dict) -> dict:
     return dict
 
 
+PK_FIELD = "pk"
+SK_FIELD = "sk"
+
+
 class DynamoFender:
     """
     DynamoDB connection handler for Fender application.
@@ -69,6 +73,36 @@ class DynamoFender:
                 batch.put_item(Item=serialized_values)
 
         return True
+
+    def _convert_updatable_dict(self, payload: dict) -> dict:
+        """
+        Convert payload to corresponding format to update
+        """
+
+        final_dict = {}
+
+        for key, value in payload.items():
+            if key == PK_FIELD or key == SK_FIELD:
+                continue
+
+            final_dict.update({key: {"Value": value}})
+
+        return final_dict
+
+    def update(self, data: dict) -> None:
+        """
+        Updates DB in dynamo
+        """
+
+        if PK_FIELD not in data.keys() or not (pk_value := data.get(PK_FIELD)):
+            raise ValueError(f"`pk` is mandatory")
+
+        # Convert dict to value field
+        attributes = self._convert_updatable_dict(data)
+
+        return self.table.update_item(
+            Key={PK_FIELD: pk_value}, AttributeUpdates=attributes
+        )
 
     def get_by_pk(self, pk: str) -> dict:
         response = self.table.query(KeyConditionExpression=Key("pk").eq(pk))
