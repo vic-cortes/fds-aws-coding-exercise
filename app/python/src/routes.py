@@ -41,7 +41,7 @@ class Router(BaseModel):
             return router_get_user_subscription(user_id=user_id)
 
         elif self.event.is_post:
-            body = SubscriptionEventPayload(**self.event.body)
+            body = SubscriptionEventPayload(**self.event.parse_body())
             return router_post_user_subscription(body=body)
 
         else:

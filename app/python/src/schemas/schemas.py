@@ -1,3 +1,4 @@
+import json
 from enum import StrEnum
 from typing import Optional
 
@@ -22,7 +23,7 @@ class UserParamsSchema(BaseModel):
 class EventSchema(BaseModel):
     httpMethod: str
     path: str
-    body: Optional[dict] = None
+    body: Optional[str] = None
     pathParameters: Optional[UserParamsSchema] = None
 
     @property
@@ -32,6 +33,11 @@ class EventSchema(BaseModel):
     @property
     def is_post(self) -> bool:
         return self.httpMethod == SupportedMethods.POST
+
+    def parse_body(self) -> dict:
+        if self.body:
+            return json.loads(self.body)
+        return {}
 
 
 class MetadataSchema(BaseModel):

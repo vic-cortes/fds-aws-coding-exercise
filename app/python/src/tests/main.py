@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 try:
@@ -194,7 +196,7 @@ def base_aws_post_event(event_body: dict) -> dict:
             "deploymentId": "w3dwr7",
             "apiId": "0s2r8aurv7",
         },
-        "body": event_body,
+        "body": json.dumps(event_body),
         "isBase64Encoded": False,
     }
 
