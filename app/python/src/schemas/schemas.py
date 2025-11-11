@@ -61,6 +61,14 @@ class SubscriptionEventPayload(BaseModel):
     metadata: MetadataSchema
 
     @property
+    def pk(self) -> str:
+        return f"user:{self.userId}"
+
+    @property
+    def sk(self) -> str:
+        return f"sub:{self.subscriptionId}"
+
+    @property
     def plan_name(self) -> str:
         return self.metadata.planSku.replace("_", " ").title()
 

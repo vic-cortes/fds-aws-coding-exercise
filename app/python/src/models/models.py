@@ -106,8 +106,8 @@ class PlanModel(BaseModel):
 class SubscriptionAdapter(BaseModel):
     payload: SubscriptionEventPayload
 
-    def _get_by_pk(self) -> dict:
-        return DynamoFenderTables.SUBSCRIPTION.get_by_pk(self.payload.userId)
+    def get_by_pk(self) -> dict:
+        return DynamoFenderTables.SUBSCRIPTIONS_AND_PLANS.get_by_pk(self.payload.pk)
 
     def _create(self) -> None:
         """
@@ -115,8 +115,8 @@ class SubscriptionAdapter(BaseModel):
         """
         DEFAULT_TYPE = "sub"
         data = {
-            "pk": self.payload.userId,
-            "sk": self.payload.subscriptionId,
+            "pk": self.payload.pk,
+            "sk": self.payload.sk,
             "type": DEFAULT_TYPE,
             "planSku": self.payload.metadata.planSku,
             "startDate": self.payload.timestamp,
@@ -168,7 +168,7 @@ class SubscriptionAdapter(BaseModel):
         """
         Process subscription event payload.
         """
-        if not self._get_by_pk():
+        if not self.get_by_pk():
             return self._create()
 
         if self.payload.is_renewal:
@@ -214,6 +214,10 @@ class PlanAdapter(BaseModel):
     def process(self) -> None:
         if not self._get_by_pk():
             return self._create()
+
+
+class SubscriptionAndPlanAdapterPost(BaseModel):
+    payload: SubscriptionEventPayload
 
 
 class SubscriptionAndPlanAdapter(BaseModel):
