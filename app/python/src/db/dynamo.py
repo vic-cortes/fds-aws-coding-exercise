@@ -149,3 +149,15 @@ class PlanTable(DynamoFender):
     def __init__(self, tablename: str = None) -> None:
         _tablename = tablename or self.__tablename__
         super().__init__(_tablename)
+
+
+class SubscriptionsAndPlansTable(DynamoFender):
+    """
+    DynamoDB handler for Plan table.
+    """
+
+    __tablename__ = "fender_digital_code_exercise"
+
+    def __init__(self, tablename: str = None) -> None:
+        _tablename = tablename or self.__tablename__
+        super().__init__(_tablename)
