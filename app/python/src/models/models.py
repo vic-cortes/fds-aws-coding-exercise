@@ -117,6 +117,35 @@ class PlanModel(BaseModel):
         return self.status == PlanStatus.INACTIVE
 
 
+class SubscriptionDetailsSchema:
+    """
+    Schema to transform SubscriptionEventPayload into SubscriptionModel data.
+    """
+
+    DEFAULT_TYPE = "sub"
+
+    def __init__(self, payload: SubscriptionEventPayload) -> None:
+        self.pk = payload.sub_pk
+        self.sk = payload.sub_sk
+        self.type = self.DEFAULT_TYPE
+        self.planSku = payload.metadata.planSku
+        self.startDate = payload.timestamp
+        self.expiresAt = payload.expiresAt
+        self.lastModified = payload.timestamp
+        self.attributes = {
+            "provider": payload.provider,
+            "paymentId": payload.paymentId,
+            "customerId": payload.customerId,
+            "autoRenew": payload.metadata.autoRenew,
+            "paymentMethod": payload.metadata.paymentMethod,
+        }
+        if payload.is_cancelled:
+            self.cancelledAt = payload.cancelledAt
+
+    def to_dict(self) -> dict:
+        return self.__dict__
+
+
 class SubscriptionAdapter(BaseModel):
     payload: SubscriptionEventPayload
 
@@ -133,26 +162,7 @@ class SubscriptionAdapter(BaseModel):
         """
         Process subscription event payload and create subscription record.
         """
-        DEFAULT_TYPE = "sub"
-        data = {
-            "pk": self.payload.sub_pk,
-            "sk": self.payload.sub_sk,
-            "type": DEFAULT_TYPE,
-            "planSku": self.payload.metadata.planSku,
-            "startDate": self.payload.timestamp,
-            "expiresAt": self.payload.expiresAt,
-            "lastModified": self.payload.timestamp,
-            "attributes": {
-                "provider": self.payload.provider,
-                "paymentId": self.payload.paymentId,
-                "customerId": self.payload.customerId,
-                "autoRenew": self.payload.metadata.autoRenew,
-                "paymentMethod": self.payload.metadata.paymentMethod,
-            },
-        }
-
-        if self.payload.is_cancelled:
-            data["cancelledAt"] = self.payload.cancelledAt
+        data = SubscriptionDetailsSchema(self.payload).to_dict()
 
         subscription_model = SubscriptionModel(**data)
         subscription_model.create()
