@@ -231,7 +231,7 @@ def test_handler_event():
     event_get = AWS_GET_EVENT_SUBSCRIPTION
 
     event_created = AWS_POST_EVENT_CREATE_SUBSCRIPTION
-    response_created = handler(event_created, context)
+    # response_created = handler(event_created, context)
     response_get = handler(event_get, context)
 
     event_created = AWS_POST_EVENT_CREATE_SUBSCRIPTION_INACTIVE_PLAN

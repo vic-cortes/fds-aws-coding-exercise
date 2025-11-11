@@ -60,7 +60,7 @@ class SubscriptionModel(BaseModel):
 
     @property
     def plan_pk(self) -> str:
-        return f"plan:{self.planSku}"
+        return f"{self.planSku}"
 
     def create(self) -> None:
         DynamoFenderTables.SUBSCRIPTIONS_AND_PLANS.write(
@@ -256,8 +256,8 @@ class SubscriptionAndPlanAdapter(BaseModel):
 
         return SubscriptionModel(**subscription[0])
 
-    def _get_plan_by_pk(self, plan_sku: str) -> PlanModel:
-        if not (plan := DynamoFenderTables.PLAN.get_by_pk(plan_sku)):
+    def _get_plan_by_pk(self, plan_pk: str) -> PlanModel:
+        if not (plan := DynamoFenderTables.SUBSCRIPTIONS_AND_PLANS.get_by_pk(plan_pk)):
             raise ValueError("Plan not found")
 
         return PlanModel(**plan[0])
@@ -297,9 +297,6 @@ def process_subscription_and_plan(payload: SubscriptionEventPayload) -> None:
     subscription_adapter = SubscriptionAdapter(payload=payload)
     subscription_adapter.process()
 
-    # plan_adapter = PlanAdapter(payload=payload)
-    # plan_adapter.process()
-
     return success_response("Subscription and Plan processed successfully")
 
 
@@ -310,4 +307,5 @@ def process_user_id(user_id: str) -> dict:
     """
     subscription_adapter = SubscriptionAndPlanAdapter(user_id=user_id)
     data = subscription_adapter.process()
+
     return success_response("User subscription retrieved successfully", data=data)

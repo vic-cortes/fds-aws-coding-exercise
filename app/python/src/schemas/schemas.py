@@ -70,7 +70,7 @@ class SubscriptionEventPayload(BaseModel):
 
     @property
     def plan_pk(self) -> str:
-        return f"plan:{self.metadata.planSku}"
+        return f"{self.metadata.planSku}"
 
     @property
     def plan_name(self) -> str:
