@@ -1,5 +1,5 @@
 import random
-from datetime import datetime, timezone
+from datetime import datetime
 from enum import StrEnum
 from typing import Literal, Optional
 
@@ -58,8 +58,14 @@ class SubscriptionModel(BaseModel):
     lastModified: str
     attributes: SubscriptionAttributes | None = None
 
+    @property
+    def plan_pk(self) -> str:
+        return f"plan:{self.planSku}"
+
     def create(self) -> None:
-        DynamoFenderTables.SUBSCRIPTION.write(self.model_dump(exclude_none=True))
+        DynamoFenderTables.SUBSCRIPTIONS_AND_PLANS.write(
+            self.model_dump(exclude_none=True)
+        )
 
     @property
     def last_date_modified(self) -> datetime:
@@ -102,21 +108,35 @@ class PlanModel(BaseModel):
     def create(self) -> None:
         DynamoFenderTables.PLAN.write(self.model_dump())
 
+    @property
+    def is_active(self) -> bool:
+        return self.status == PlanStatus.ACTIVE
+
+    @property
+    def is_inactive(self) -> bool:
+        return self.status == PlanStatus.INACTIVE
+
 
 class SubscriptionAdapter(BaseModel):
     payload: SubscriptionEventPayload
 
-    def get_by_pk(self) -> dict:
-        return DynamoFenderTables.SUBSCRIPTIONS_AND_PLANS.get_by_pk(self.payload.pk)
+    def get_sub_by_pk(self) -> dict:
+        return DynamoFenderTables.SUBSCRIPTIONS_AND_PLANS.get_by_pk(self.payload.sub_pk)
 
-    def _create(self) -> None:
+    def get_plan_by_pk(self) -> PlanModel | None:
+        if plan := DynamoFenderTables.SUBSCRIPTIONS_AND_PLANS.get_by_pk(
+            self.payload.plan_pk
+        ):
+            return PlanModel(**plan[0])
+
+    def create_sub(self) -> None:
         """
         Process subscription event payload and create subscription record.
         """
         DEFAULT_TYPE = "sub"
         data = {
-            "pk": self.payload.pk,
-            "sk": self.payload.sk,
+            "pk": self.payload.sub_pk,
+            "sk": self.payload.sub_sk,
             "type": DEFAULT_TYPE,
             "planSku": self.payload.metadata.planSku,
             "startDate": self.payload.timestamp,
@@ -142,34 +162,37 @@ class SubscriptionAdapter(BaseModel):
         Update plan on renewal if needed.
         """
         update_dict = {
-            "pk": self.payload.userId,
-            "sk": self.payload.subscriptionId,
+            "pk": self.payload.sub_pk,
+            "sk": self.payload.sub_sk,
             "lastModified": self.payload.timestamp,
             "expiresAt": self.payload.expiresAt,
             "internalStatus": SubscriptionStatus.ACTIVE,
         }
-        DynamoFenderTables.SUBSCRIPTION.update(update_dict)
+        DynamoFenderTables.SUBSCRIPTIONS_AND_PLANS.update(update_dict)
 
     def _update_cancelled(self) -> None:
         """
         Update plan on renewal if needed.
         """
         update_dict = {
-            "pk": self.payload.userId,
-            "sk": self.payload.subscriptionId,
+            "pk": self.payload.sub_pk,
+            "sk": self.payload.sub_sk,
             "lastModified": self.payload.timestamp,
             "expiresAt": self.payload.expiresAt,
             "cancelledAt": self.payload.cancelledAt,
             "internalStatus": SubscriptionStatus.CANCELLED,
         }
-        DynamoFenderTables.SUBSCRIPTION.update(update_dict)
+        DynamoFenderTables.SUBSCRIPTIONS_AND_PLANS.update(update_dict)
 
     def process(self) -> None:
         """
         Process subscription event payload.
         """
-        if not self.get_by_pk():
-            return self._create()
+        if not (plan := self.get_plan_by_pk()) or plan.is_inactive:
+            raise ValueError("Plan is inactive or does not exist")
+
+        if not self.get_sub_by_pk():
+            return self.create_sub()
 
         if self.payload.is_renewal:
             # Add logic to update plan if needed on renewal
@@ -216,16 +239,18 @@ class PlanAdapter(BaseModel):
             return self._create()
 
 
-class SubscriptionAndPlanAdapterPost(BaseModel):
-    payload: SubscriptionEventPayload
-
-
 class SubscriptionAndPlanAdapter(BaseModel):
     user_id: str
 
+    @property
+    def sub_pk(self) -> str:
+        return f"user:{self.user_id}"
+
     def _get_sub_by_pk(self) -> SubscriptionModel:
         if not (
-            subscription := DynamoFenderTables.SUBSCRIPTION.get_by_pk(self.user_id)
+            subscription := DynamoFenderTables.SUBSCRIPTIONS_AND_PLANS.get_by_pk(
+                self.sub_pk
+            )
         ):
             raise ValueError("Subscription not found")
 
@@ -239,7 +264,7 @@ class SubscriptionAndPlanAdapter(BaseModel):
 
     def process(self) -> dict:
         subscription = self._get_sub_by_pk()
-        plan = self._get_plan_by_pk(subscription.planSku)
+        plan = self._get_plan_by_pk(subscription.plan_pk)
 
         data = {
             "userId": subscription.pk,
@@ -272,8 +297,8 @@ def process_subscription_and_plan(payload: SubscriptionEventPayload) -> None:
     subscription_adapter = SubscriptionAdapter(payload=payload)
     subscription_adapter.process()
 
-    plan_adapter = PlanAdapter(payload=payload)
-    plan_adapter.process()
+    # plan_adapter = PlanAdapter(payload=payload)
+    # plan_adapter.process()
 
     return success_response("Subscription and Plan processed successfully")
 

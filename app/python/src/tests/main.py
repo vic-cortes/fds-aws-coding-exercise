@@ -26,7 +26,23 @@ CREATED_SUBSCRIPTION_EVENT = {
     "customerId": "cus_789012",
     "expiresAt": "2024-04-20T10:00:00Z",
     "metadata": {
-        "planSku": "PREMIUM_MONTHLY",
+        "planSku": "plan:XYZ123",
+        "autoRenew": True,
+        "paymentMethod": "CREDIT_CARD",
+    },
+}
+CREATED_SUBSCRIPTION_EVENT_INACTIVE_PLAN = {
+    "eventId": "evt_123456789",
+    "eventType": "subscription.created",
+    "timestamp": "2024-03-20T10:00:00Z",
+    "provider": "STRIPE",
+    "subscriptionId": "sub_456789",
+    "paymentId": "pm_123456",
+    "userId": "123",
+    "customerId": "cus_789012",
+    "expiresAt": "2024-04-20T10:00:00Z",
+    "metadata": {
+        "planSku": "plan:ABC456",
         "autoRenew": True,
         "paymentMethod": "CREDIT_CARD",
     },
@@ -42,7 +58,7 @@ RENEWED_SUBSCRIPTION_EVENT = {
     "customerId": "cus_789012",
     "expiresAt": "2024-05-20T10:00:00Z",
     "metadata": {
-        "planSku": "PREMIUM_MONTHLY",
+        "planSku": "plan:DEF789",
         "autoRenew": True,
         "paymentMethod": "CREDIT_CARD",
     },
@@ -60,7 +76,7 @@ CANCELLED_SUBSCRIPTION_EVENT = {
     "expiresAt": "2024-05-20T10:00:00Z",
     "cancelledAt": "2024-05-20T10:00:00Z",
     "metadata": {
-        "planSku": "PREMIUM_MONTHLY",
+        "planSku": "plan:GHI012",
         "autoRenew": False,
         "paymentMethod": "CREDIT_CARD",
         "cancelReason": "USER_REQUESTED",
@@ -202,17 +218,24 @@ def base_aws_post_event(event_body: dict) -> dict:
 
 
 AWS_POST_EVENT_CREATE_SUBSCRIPTION = base_aws_post_event(CREATED_SUBSCRIPTION_EVENT)
+AWS_POST_EVENT_CREATE_SUBSCRIPTION_INACTIVE_PLAN = base_aws_post_event(
+    CREATED_SUBSCRIPTION_EVENT_INACTIVE_PLAN
+)
 AWS_POST_EVENT_RENEW_SUBSCRIPTION = base_aws_post_event(RENEWED_SUBSCRIPTION_EVENT)
 AWS_POST_EVENT_CANCEL_SUBSCRIPTION = base_aws_post_event(CANCELLED_SUBSCRIPTION_EVENT)
 
 
 # @pytest.mark.skip(reason="Skipping this test for now")
 def test_handler_event():
-    event_get = AWS_GET_EVENT_SUBSCRIPTION
-    event_created = AWS_POST_EVENT_CREATE_SUBSCRIPTION
     context = {}
+    event_get = AWS_GET_EVENT_SUBSCRIPTION
 
+    event_created = AWS_POST_EVENT_CREATE_SUBSCRIPTION
     response_created = handler(event_created, context)
+    response_get = handler(event_get, context)
+
+    event_created = AWS_POST_EVENT_CREATE_SUBSCRIPTION_INACTIVE_PLAN
+    response_renewed = handler(event_created, context)
     response_get = handler(event_get, context)
 
     event_renewed = AWS_POST_EVENT_RENEW_SUBSCRIPTION
